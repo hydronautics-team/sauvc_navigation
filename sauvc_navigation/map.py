@@ -123,8 +123,8 @@ class Map :
 
     @staticmethod
     def sendVector(vector):
-        speed = vector[4][:]
-        angle = vector[3][:]
+        speed = vector[5][:]
+        angle = vector[4][:]
         pass
 
     def update(self, bbox_array: BboxArray):
@@ -132,6 +132,7 @@ class Map :
 
         for bbox in bbox_array.bboxes:
             #distance, relativeAngle, name
+            if bbox.distance < 0 : continue
             self.__updateObject(bbox.distance, bbox.angle, bbox.name)
 
         for obj in self.objects :
@@ -255,7 +256,11 @@ class Map :
     #
     #     return state, vector, image, endPoint
 
-    def find(self, targetName, circles, startPoint, needToDraw, speedLongRatio):
+    def find(self, targetName, needToDraw):
+
+        circles = self.getCircles(targetName)
+
+        startPoint = [self.x, self.y, self.z]
 
 
         # for staying
@@ -435,7 +440,8 @@ class Map :
         startPoint = [self.x, self.y, self.z]
 
         if targetName not in self.objects or not self.objects[targetName].isActive:
-            state, vector, image, endPoint = self.find(targetName, circles, startPoint, needToDraw, speedLongRatio)
+            #state, vector, image, endPoint = self.find(targetName, circles, startPoint, needToDraw, speedLongRatio)
+            state, vector, image, endPoint = self.find(targetName, needToDraw)
             if state == Mesh.STATE_OK : state = Mesh.STATE_FIND
             #isFind = True
         else :
@@ -447,7 +453,7 @@ class Map :
             #if targetName not in self.objects : isFind = True
             self.findState = FS_START_FIND
 
-        # new danger (but necessary) code start
+        # new danger (but necessary) code
         angle = vector[4][2]
         #angle += vector[4][2]
         speed = vector[5]
@@ -466,7 +472,7 @@ class Map :
         #                      startPoint[0] + Mesh.cos(self.lastAngle) * 7,
         #                      startPoint[1] + Mesh.sin(self.lastAngle) * 7, 'black', 3)
 
-        if (angleDistance > MAX_VIBE_ANGLE and False and
+        if (angleDistance > MAX_VIBE_ANGLE and True and
                 self.findState != FS_FIRST_CIRCLE_HALF and self.findState != FS_SECOND_CIRCLE_HALF and
                 self.findState != FS_FIRST_CIRCLE_FULL and self.findState != FS_SECOND_CIRCLE_FULL
             and (state == Mesh.STATE_OK or state == Mesh.STATE_FIND) and

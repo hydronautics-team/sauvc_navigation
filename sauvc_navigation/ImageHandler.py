@@ -101,13 +101,17 @@ def calcDistanceAndAngle(frameData, image) :
         if object.name == 'gate_qualification' :
             object.name = 'gate'
 
-        if objectData.get(object.name, None) == None : continue
+        if objectData.get(object.name, None) == None : 
+            objectPosition.append([-1, 0, name])
+            continue
 
         #rint('adasd')
         #print(frameData)
         #input()
 
-        if object.p < objectData[object.name].p : continue
+        if object.p < objectData[object.name].p :
+            objectPosition.append([-1, 0, name])
+            continue
 
         name = object.name
         realSizeX, realSizeY = objectData[object.name].width, objectData[object.name].height
@@ -132,15 +136,18 @@ def calcDistanceAndAngle(frameData, image) :
 
         if (max(calcRatio, realRatio) / min(calcRatio, realRatio)) > objectData[object.name].maxRatio :
             print('NO')
+            objectPosition.append([-1, 0, name])
             continue
 
         D = DX
         print(object, object.x1, object.y1, object.x2, object.y2)
         if (object.y1 == 0 or object.y2 == PIXEL_RESOLUTION_Y) and (object.x1 == 0 or object.x2 == PIXEL_RESOLUTION_X):
             print('NO')
+            objectPosition.append([-1, 0, name])
             continue
         if (object.x1 == 0 or object.x2 == PIXEL_RESOLUTION_X):
             print('NO')
+            objectPosition.append([-1, 0, name])
             continue
         if (object.x1 != 0 and object.x2 != PIXEL_RESOLUTION_X) :
             D = DX
