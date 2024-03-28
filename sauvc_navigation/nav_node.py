@@ -4,7 +4,7 @@ from rclpy.node import Node
 from rclpy.action import ActionServer
 from rclpy.action.server import ServerGoalHandle
 
-from stingray_interfaces.action import MoveToObjectAction
+from stingray_interfaces.action import BboxPathTwistAction
 from stingray_interfaces.msg import BboxArray
 from stingray_core_interfaces.srv import SetTwist
 from stingray_core_interfaces.msg import UVState
@@ -22,8 +22,8 @@ class NavNode(Node):
         self.declare_parameter("bbox_array_topic",
                                "/stingray/topics/camera/bbox_array")
         self.declare_parameter("set_twist_srv", "/stingray/services/set_twist")
-        self.declare_parameter("move_to_object_action",
-                               "/stingray/actions/move_to_object")
+        self.declare_parameter("bbox_path_twist_action",
+                               "/stingray/actions/bbox_path_twist")
 
         self.declare_parameter("camera_fov", 60)
         self.declare_parameter("camera_resolution_x", 640)
@@ -68,9 +68,9 @@ class NavNode(Node):
 
         self.move_action_server = ActionServer(
             self,
-            MoveToObjectAction,
+            BboxPathTwistAction,
             self.get_parameter(
-                "move_to_object_action").get_parameter_value().string_value,
+                "bbox_path_twist").get_parameter_value().string_value,
             self.execute_move_callback)
 
         self.i = 0
@@ -99,7 +99,7 @@ class NavNode(Node):
 
         goal_handle.succeed()
 
-        result = MoveToObjectAction.Result()
+        result = BboxPathTwistAction.Result()
         return result
 
 
