@@ -132,6 +132,7 @@ class Map :
 
         for bbox in bbox_array.bboxes:
             #distance, relativeAngle, name
+            if bbox.distance is None: continue
             if bbox.distance < 0 : continue
             self.__updateObject(bbox.distance, bbox.angle, bbox.name)
 

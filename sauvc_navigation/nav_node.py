@@ -8,7 +8,7 @@ from stingray_interfaces.action import MoveToObjectAction
 from stingray_interfaces.msg import BboxArray
 from stingray_core_interfaces.srv import SetTwist
 
-from sauvc_navigation.map import Map
+from sauvc_navigation.Map import Map
 
 
 class NavNode(Node):

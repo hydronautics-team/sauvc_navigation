@@ -1,7 +1,7 @@
 import AStar
 import ImageHandler
 import Mesh
-import sauvc_navigation.map as map
+import sauvc_navigation.Map as map
 
 killOrder = ['yellow_flare', 'red_flare']
 
