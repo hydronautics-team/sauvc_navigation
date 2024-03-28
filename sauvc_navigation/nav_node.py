@@ -19,8 +19,8 @@ class NavNode(Node):
         super().__init__("nav_node")
         self.declare_parameter("uv_state_topic",
                                "/stingray/topics/uv_state")
-        self.declare_parameter("objects_array_topic",
-                               "/stingray/topics/camera/objects")
+        self.declare_parameter("bbox_array_topic",
+                               "/stingray/topics/camera/bbox_array")
         self.declare_parameter("set_twist_srv", "/stingray/services/set_twist")
         self.declare_parameter("move_to_object_action",
                                "/stingray/actions/move_to_object")
@@ -55,7 +55,7 @@ class NavNode(Node):
         self.bbox_array_sub = self.create_subscription(
             BboxArray,
             self.get_parameter(
-                "objects_array_topic").get_parameter_value().string_value,
+                "bbox_array_topic").get_parameter_value().string_value,
             self.bbox_array_callback,
             1)
 
