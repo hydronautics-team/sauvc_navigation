@@ -57,7 +57,7 @@ class Map :
     # position -> [surge, pitch, always zero]
     # angle -> yaw
     def calcPath(self):
-        needToDraw = True
+        needToDraw = False
 
         targetName = self.target
 
