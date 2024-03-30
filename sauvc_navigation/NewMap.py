@@ -4,6 +4,8 @@ import AStar
 import ImageHandler
 import Mesh
 
+#from test import *
+
 
 # robotR - собственный радиус
 # fc_in - кадров для инакцивации объектов
@@ -35,9 +37,8 @@ class Map :
         self.lastVector = [0, 0, 0]
 
         self.lastAngle = 0
-        self.lastTurn = 0
-        self.lastSpeedAbs = 0
         self.lastTargetName = ''
+        self.lastActiveCount = 0
 
     # this function update object's name, witch we must go
     def updateTarget(self, targetName):
@@ -56,7 +57,7 @@ class Map :
     # position -> [surge, pitch, always zero]
     # angle -> yaw
     def calcPath(self):
-        needToDraw = False
+        needToDraw = True
 
         targetName = self.target
 
@@ -65,40 +66,47 @@ class Map :
         startPoint = [self.x, self.y, self.z]
 
         if targetName not in self.objects or not self.objects[targetName].isActive:
+            #endPoint=  [0, 0, 0]
+            #state, vector, image = Mesh.calcMove(circles, startPoint, [0, 0, self.angle], endPoint, needToDraw, 1, 1)
+            #return Mesh.STATE_FIND, vector, image
             return Mesh.STATE_FIND, [0, 0, 0], 0
 
         r = ImageHandler.objectData[targetName].goodR + self.robotR
         endPoint = [self.objects[targetName].x, self.objects[targetName].y, r]
 
-        state, vector, image = Mesh.calcMove(circles, startPoint, self.angle, endPoint, needToDraw, 1, 1)
+        state, vector, image = Mesh.calcMove(circles, startPoint, [0, 0, self.angle], endPoint, needToDraw, 1, 1)
 
         # new danger (but necessary) code start
         angle = vector[4][2] % 360
         angleDistance = min(abs(angle - self.lastAngle), 360 - abs(angle - self.lastAngle))
+        activeCount = self.__getActiveObjCount()
 
-        if angleDistance > 7 and state == Mesh.STATE_OK and self.lastTargetName == targetName:
+        if (angleDistance > 7 and state == Mesh.STATE_OK and self.lastTargetName == targetName
+                and self.lastActiveCount == activeCount):
             angleAAA = [0, 0, self.lastAngle]
+            # about 5 degrees cost must be < one significant step
+            degrees = 5
+            step = 0.5
+            oneDegCost = step / degrees
             state, vector, image = Mesh.calcMove(circles, startPoint, angleAAA, endPoint, needToDraw,
-                                                 1, 1, 1)
+                                                 1, 1, oneDegCost)
             angle = vector[4][2] % 360
 
         self.lastAngle = angle
         self.lastTargetName = targetName
+        self.lastActiveCount = self.__getActiveObjCount()
 
         # new danger (but necessary) code end
-        dt = time.time() - self.lastPosUpdateTime
-        self.x += self.lastVector[0] * dt * self.sc
-        self.y += self.lastVector[1] * dt * self.sc
-        self.lastPosUpdateTime = time.time()
-        self.lastVector = vector[0][:]
+        self.__intPos(vector)
 
         speed = vector[5][:]
         angle = vector[4][2]
 
         return state, speed, angle
+        #return state, vector, image
 
     # this function update current yaw angle on the map
-    def updateAngle(self, angle):
+    def updateAngle(self, angle: float):
         self.angle = angle
 
     # update objects from Bbox array
@@ -142,6 +150,19 @@ class Map :
         self.objects[name].frameCount = self.frameCount
         self.objects[name].totalPath = self.totalPath
         self.objects[name].isActive = True
+
+    def __intPos(self, vector):
+        dt = time.time() - self.lastPosUpdateTime
+        self.x += self.lastVector[0] * dt * self.sc
+        self.y += self.lastVector[1] * dt * self.sc
+        self.lastPosUpdateTime = time.time()
+        self.lastVector = vector[0][:]
+
+    def __getActiveObjCount(self):
+        q = 0
+        for obj in self.objects:
+            if self.objects[obj].isActive : q += 1
+        return q
 
     def __calcObjectRadius(self, obj) :
         return ImageHandler.objectData.get(obj.name, 1).badR + self.robotR
